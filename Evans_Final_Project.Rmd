@@ -1,0 +1,296 @@
+---
+title: "Evans_Final_Project"
+author: "Maryanne Evans"
+date: "12/5/2021"
+output: pdf_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#=============================Task 1: Simulation Study============================#
+For this part of the project you will need to perform a simulation study to investigate the properties of four sample statistics: the mean, the 25th percentile, the minimum, and a difference in medians.
+#Import Libraries
+
+```{r}
+library(ggplot2)
+library(ggpubr)
+```
+
+Using repeated samples of size n = 10, 100, and 1000 from the bmi variable, describe the sampling distribution of the sample mean of BMI in 2017. Include at least one plot to help describe your results. Report the means and standard deviations of the sampling distributions, and describe how they change with increasing sample size.
+```{r}
+#BMI Variable Sample Mean Analysis (Distribution) for 2017
+#clean up the data, checking for and removing NA
+
+yrbss_2007 <- readRDS("yrbss_2007.rds")
+yrbss_2017 <- readRDS("yrbss_2017.rds")
+
+sum(is.na(yrbss_2007[, "bmi"]))
+sum(is.na(yrbss_2017[, "bmi"]))
+
+#Focus on BMI Columns Only, Sub-setting
+BMI07 <- yrbss_2017$bmi
+BMI17 <- yrbss_2017$bmi 
+
+#View BMI Subsets
+head(BMI07)
+head(BMI17)
+
+#=======Exploring the Data Distributions and Test Stats (mean and sd)==============
+
+#create the SIMULATION
+get_means <- function(n, n_sim=1000){
+  replicate(n_sim, mean(sample(yrbss_2017$bmi, size = n, replace = TRUE)))
+}
+
+#Apply to each sample size, exploring the data
+means <- lapply(c(10, 100, 1000), get_means)
+
+#========SAMPLE n = 10=======
+sample_sd_10 <- sd(means[[1]]) 
+sample_mean_10 <- means[[1]]
+
+#===TEST STATS====
+#mean = 23.62922
+sample_mean_10 <- means[[1]]
+mean(sample_mean_10)
+
+#standard deviation = 1.575878
+sample_sd_10 <- sd(means[[1]]) 
+sample_sd_10
+
+#====HISTO for N = 10 ====
+sample_plot_10 <- qplot(sample_mean_10, binwidth = 0.09, main = "Mean BMI Year 2017", xlab = "Mean Sample Size 10", ylab = "Frequency", col = I("darkblue"), fill = I("lightblue"))
+sample_plot_10
+
+#========SAMPLE n = 100=======
+sample_sd_100 <- sd(means[[2]]) 
+sample_mean_100 <- means[[2]]
+
+#===TEST STATS (SD and MEAN)====
+#mean = 23.62378
+sample_mean_100 <- means[[2]]
+mean(sample_mean_100)
+
+#standard deviation =  0.507905
+sample_sd_100 <- sd(means[[2]]) 
+sample_sd_100
+
+#====HISTO for N = 100 ====
+sample_plot_100 <- qplot(sample_mean_100, binwidth = 0.09, main = "Mean BMI Year 2017", xlab = "Mean Sample Size 100", ylab = "Frequency", col = I("darkblue"), fill = I("lightblue"))
+sample_plot_100
+
+#========SAMPLE n = 1000=======
+sample_sd_1000 <- sd(means[[3]]) 
+sample_mean_1000 <- means[[3]]
+
+#===TEST STATS (SD and MEAN)====
+#mean = 23.62378
+sample_mean_1000 <- means[[3]]
+mean(sample_mean_1000)
+
+#standard deviation = 0.1632048
+sample_sd_1000 <- sd(means[[3]]) 
+sample_sd_1000
+
+#====HISTO for N = 100 ====
+sample_plot_1000 <- qplot(sample_mean_1000, binwidth = 0.09, main = "Mean BMI Year 2017", xlab = "Mean Sample Size 1000", ylab = "Frequency", col = I("darkblue"), fill = I("lightblue"))
+
+sample_plot_1000
+
+#Tentative Explanation with increasing sample size: the data appears to become more normal with increasing sample size, lending itself to the Central Limit Theorem (CLT). 
+
+```
+
+
+Repeat the simulation in part (a), but this time use the 25th percentile as the sample statistic. In R, quantile(x, prob = 0.25) will give you the 25th percentile of the values in x.
+
+```{r}
+#=======Exploring the Data Distributions and Test Stats (mean and SD of 25th percentile)==============
+
+#subset the data to the 25th percentile, to use as sample stat
+#create the SIMULATION for the 25th percentile
+get_25 <- function(n, n_sim=5000){
+  replicate(n_sim, quantile(sample(yrbss_2017$bmi, size = n, replace = TRUE), prob = 0.25))
+}
+#Apply to each sample size, exploring the data
+get_25_all <- lapply(c(10, 100, 1000), get_25) 
+
+#N = 10
+sample_10 <- get_25_all[[1]]
+#TEST STATS
+mean(sample_10)
+sd(sample_10)
+#VIZ
+sample_plot_10 <-  qplot(sample_10, binwidth = 0.007, main = "25th Percentile BMI 2017", xlab = "BMI 25th Percentile (N = 10)", ylab = "Frequency", xlim=c (16, 28), ylim=c(0, 30), col = I("darkblue"), fill = I("lightblue"))
+sample_plot_10
+
+#N = 100
+sample_100 <- get_25_all[[2]]
+#TEST STATS
+mean(sample_100)
+sd(sample_100)
+#VIZ
+sample_plot_100 <- qplot(sample_100, binwidth = 0.007, main = "25th Percentile BMI 2017", xlab = "BMI 25th Percentile (N = 100)", ylab = "Frequency", xlim=c (16, 28), ylim=c(0, 100), col = I("darkblue"), fill = I("lightblue"))
+sample_plot_100
+
+#N = 1000
+sample_1000 <- get_25_all[[3]]
+#TEST STAT
+mean(sample_1000)
+sd(sample_1000)
+#VIZ
+sample_plot_1000 <- qplot(sample_1000, binwidth = 0.007, main = "25th Percentile BMI 2017", xlab = "BMI 25th Percentile (N = 1000)", ylab = "Frequency", xlim= c (16, 28), ylim= c(0, 350), col = I("darkblue"), fill = I("lightblue"))
+sample_plot_1000
+
+```
+
+
+Repeat the simulation in part (a), but this time use the sample minimum as the sample statistic.
+```{r}
+#BMI Variable Sample Minimum Analysis (Distribution) for 2017
+get_min <- function(n, n_sim=1000){
+  replicate(n_sim, min(sample(yrbss_2017$bmi, size = n, replace = TRUE)))
+}
+
+mins <- lapply(c(10, 100, 1000), get_min)
+#N = 10
+sample_min_10 <- mins[[1]]
+#===TEST STATS====
+sample_min_10 <- mins[[1]]
+mean(sample_min_10)
+sd(sample_min_10)
+#VIZ
+sample_plot_10 <- qplot(sample_min_10, binwidth = 0.09, main = "Minimum BMI 2017", xlab = "BMI Minimum (N = 10)", ylab = "Frequency", col = I("darkblue"), fill = I("lightblue"))
+sample_plot_10
+#N = 100
+sample_min_100 <- mins[[2]]
+#===TEST STATS====
+mean(sample_min_100)
+sd(sample_min_100)
+#VIZ
+sample_plot_100 <- qplot(sample_min_10, binwidth = 0.09, main = "Minimum BMI 2017", xlab = "BMI Minimum (N = 100)", ylab = "Frequency", col = I("darkblue"), fill = I("lightblue"))
+sample_plot_100
+#N = 100
+sample_min_1000 <- mins[[3]]
+#===TEST STATS====
+mean(sample_min_1000)
+sd(sample_min_1000)
+#VIZ
+sample_plot_1000 <- qplot(sample_min_1000, binwidth = 0.09, main = "Minimum BMI 2017", xlab = "BMI Minimum (N = 1000)", ylab = "Frequency",  xlim= c (12, 20), ylim= c(0, 350),  col = I("darkblue"), fill = I("lightblue"))
+sample_plot_1000
+
+```
+
+Describe the sampling distribution of the difference in the sample median BMI between 2017 and 2007, by using repeated samples of size n_1 = 5, n_2 = 5, n_1 = 10, n_2 = 10 and n_1 = 100, n_2 = 100. Report the means and standard deviations of the sampling distributions, and describe how they change with the different sample sizes.
+
+```{r}
+
+#SIMULATION for 2017 and 2007
+#sample size = 5
+median_bmi_5 <- replicate(1000, median(sample(yrbss_2017$bmi, size = 5) - median(sample(yrbss_2007$bmi, size = 5))))
+mean(median_bmi_5)
+sd(median_bmi_5)
+
+qplot(median_bmi_5, binwidth = 0.9, main = "Difference in Medians 2007 and 2017", xlab = "BMI Diff Medians (N = 5)", ylab = "Frequency", col = I("darkblue"), fill = I("lightblue"))
+
+#sample size = 10
+median_bmi_10 <- replicate(1000, median(sample(yrbss_2017$bmi, size = 10) - median(sample(yrbss_2007$bmi, size = 10))))
+mean(median_bmi_10)
+sd(median_bmi_10)
+
+qplot(median_bmi_10, binwidth = 0.9, main = "Difference in Medians 2007 and 2017", xlab = "BMI Diff Medians (N = 10)", ylab = "Frequency", col = I("darkblue"), fill = I("lightblue"))
+
+#sample size = 100
+median_bmi_100 <- replicate(1000, median(sample(yrbss_2017$bmi, size = 100) - median(sample(yrbss_2007$bmi, size = 100))))
+#stats
+mean(median_bmi_100)
+sd(median_bmi_100)
+#vis
+qplot(median_bmi_100, binwidth = 0.1, main = "Difference in Medians 2007 and 2017", xlab = "BMI Diff Medians (N = 100)", ylab = "Frequency", col = I("darkblue"), fill = I("lightblue"))
+
+```
+
+#=========================TASK 2: Data Analysis====================================#
+
+
+For this part of your assignment your task is to analyze the data to answer the questions of interest. Your solutions must include a non-technical summary of your findings. Using the same data as the Simulation Study, but now treating the survey as a sample from the population of all USA high-school students:
+
+1) How has the BMI of high-school students changed between 2007 and 2017? Are high-schoolers getting more overweight?
+
+```{r}
+x = yrbss_2007$bmi
+y = yrbss_2017$bmi
+t.test(x,y)
+```
+
+
+For this question, we are comparing two independent populations (students in 2007 to students in 2017). I would preform a t-test, such as the Welch’s two sample t-test and construct a confidence intervals for the difference in means in weight, testing the hypothesis: "High schoolers are getting more overweight as time goes on between the years 2007 and 2017".  
+
+2) In 2017, are 12th graders more or less likely than 9th graders to be “physically active at least 60 minutes per day on 5 or more days”?
+
+Associated Code:
+```{r}
+#Subset Data
+Active_12 <- yrbss_2017[yrbss_2017$grade == "12th", "qn79"]
+Active_12
+
+#Count Response Active 12th
+True_12 <- length(which(Active_12 == TRUE))
+False_12 <- length(which(Active_12 == FALSE))
+
+True_12
+False_12
+
+#9th Grader Response
+Active_9 <- yrbss_2017[yrbss_2017$grade == "9th", "qn79"]
+Active_9
+
+#Count Response Active 9th
+True_9 <- length(which(Active_9 == TRUE))
+False_9 <- length(which(Active_9 == FALSE))
+
+True_9
+False_9
+
+#prop test for two populations
+
+X <- c(1149, 1680)
+n <- c((1149+1860), (1680+1604))
+
+prop.test(X,n,correct=FALSE)
+```
+
+
+Given I would use a two sample prop test to address this question, because there are two different populations with a difference in proportions to investigate, with binary observations.
+
+3) How much sleep do highschoolers get?
+
+The data is not numerical, and therefore no test stat is needed to answer this question. Instead, I would explore the sample quartiles and compare them across the high schoolers. I would visualize these data using histograms, bucketing 25th, 50th and 75th percentiles, before trying to draw conclusions.
+
+```{r}
+sum(is.na(yrbss_2007[, "q88"]))
+sum(is.na(yrbss_2017[, "q88"]))
+
+x = yrbss_2007$q88
+y = yrbss_2017$q88
+
+plotx<-as.data.frame(x) 
+ploty<-as.data.frame(y) 
+
+#for2007
+ggplot(plotx, aes(x)) +
+    geom_bar() +
+    labs(x = 'Sleep', y = 'Count') +
+    ggtitle('Hours of Sleep 2007 High School Students')
+
+#for2017
+ggplot(ploty, aes(y)) +
+    geom_bar() +
+    labs(x = 'Sleep', y = 'Count') +
+    ggtitle('Hours of Sleep 2017 High School Students')
+
+
+```
+
+
